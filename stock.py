@@ -74,7 +74,7 @@ max_date = tsla_filtered[tsla_filtered[selected_column] == max_num].index[0].dat
 col1, col2, col3 = st.columns(3)
 col1.metric(f"📉 Minimum {selected_column}", f"{min_num:.2f}", f"Date: {min_date}")
 col2.metric(f"📈 Maximum {selected_column}", f"{max_num:.2f}", f"Date: {max_date}")
-col3.metric(f"💸 Profit from Max and Min Price ", f"${max_num - min_num:.2f}", f" P%: {((max_num - min_num)/max_num)*100:.2f}% ")
+col3.metric(f"Max and Min Price Difference", f"${max_num - min_num:.2f}", f" P%: {((max_num - min_num)/max_num)*100:.2f}% ")
 
 chart_data = tsla_filtered.reset_index()[['Date', selected_column]]
 chart = alt.Chart(chart_data).mark_line().encode(
