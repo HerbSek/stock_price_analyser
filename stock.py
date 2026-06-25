@@ -62,6 +62,9 @@ selected_dates = st.slider(
 start_date, end_date = selected_dates
 tsla_filtered = tsla[(tsla.index >= pd.to_datetime(start_date)) & (tsla.index <= pd.to_datetime(end_date))]
 
+if tsla_filtered.empty:
+    st.warning("No trading data found for the selected date range. Please choose a range that includes trading days.")
+    st.stop()
 
 min_num = tsla_filtered[selected_column].min()
 max_num = tsla_filtered[selected_column].max()
@@ -74,7 +77,7 @@ max_date = tsla_filtered[tsla_filtered[selected_column] == max_num].index[0].dat
 col1, col2, col3 = st.columns(3)
 col1.metric(f"📉 Minimum {selected_column}", f"{min_num:.2f}", f"Date: {min_date}")
 col2.metric(f"📈 Maximum {selected_column}", f"{max_num:.2f}", f"Date: {max_date}")
-col3.metric(f"Max and Min Price Difference", f"${max_num - min_num:.2f}", f" P%: {((max_num - min_num)/max_num)*100:.2f}% ")
+col3.metric(f"Max and Min Price Difference", f"${max_num - min_num:.2f}", f" P%: {((max_num - min_num)/min_num)*100:.2f}% ")
 
 chart_data = tsla_filtered.reset_index()[['Date', selected_column]]
 chart = alt.Chart(chart_data).mark_line().encode(
@@ -90,23 +93,27 @@ st.markdown("##### This is based on the period selected ")
 cash_invested = st.number_input("Enter the cash amount you want to invest ($)", min_value=1, value=1000)
 
 
+if min_num == 0:
+    st.error("Cannot simulate investment: the minimum price in this period is $0.00.")
+    st.stop()
+
 shares_bought = cash_invested / min_num
 final_value = shares_bought * max_num
 profit_loss = (final_value - cash_invested) 
 
 
-if profit_loss <= cash_invested:
-    st.error(f"**Remaining Amount**: ${profit_loss:.2f}")
+if profit_loss <= 0:
+    st.error(f"**Profit/Loss**: ${profit_loss:.2f}")
 else:
-     st.success(f"**Remaining Amount**: ${profit_loss:.2f}")
+     st.success(f"**Profit/Loss**: ${profit_loss:.2f}")
 
 
 roi = ((max_num - min_num) / min_num) * 100
 
-if profit_loss <= cash_invested:
-    st.error(f"**Return on Investment (ROI)**: {roi - 100:.2f}%")
+if profit_loss <= 0:
+    st.error(f"**Return on Investment (ROI)**: {roi:.2f}%")
 else:
-    st.success(f"**Return on Investment (ROI)**: {roi - 100:.2f}%")
+    st.success(f"**Return on Investment (ROI)**: {roi:.2f}%")
 
 
 
